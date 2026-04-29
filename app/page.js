@@ -13,38 +13,30 @@ import {
   FileWarning,
   Mail,
   ExternalLink,
+  MessageSquare,
 } from "lucide-react";
 
 const learningEvents = [
-  {
-    type: "unanswered",
-    question: "Can I have a guest use the sauna with me?",
-    status: "Pending review",
-  },
-  {
-    type: "needs-review",
-    question: "What happens if I park in front overnight?",
-    status: "Suggested answer drafted",
-  },
+  { type: "unanswered", question: "Can I have a guest use the sauna with me?", status: "Pending review" },
+  { type: "needs-review", question: "What happens if I park in front overnight?", status: "Suggested answer drafted" },
 ];
 
 const handbookContacts = {
-  propertyManager: "Delethia Foxx • dfoxx@heritageproperty.com • 770-200-8610",
+  propertyManager:
+    "Amber Nash, CAM • Community Association Manager • Heritage Property Management Services, LLC • 500 Sugar Mill Road, Building B, Suite 200, Atlanta, GA 30350 • Main: 770-451-8171 • Direct: 770-200-8558 • anash@heritageproperty.com • www.heritageproperty.com",
   emergencyDay: "Emergency Answering Service (daytime): 770-200-8237",
   emergency24: "Emergency Answering Service (24 hours): 770-451-8171",
-  liaison: "Community Liaison: hillsideatlenox@outlook.com",
+  liaison: "Community Liaison: board@hillsideatlenox.com",
   communityWatch: "Community Watch: 404-883-3350 or 811 on Hillside callboxes",
   towing: "A-Tow: 404-577-8950",
-  portal: "Vantaca portal: portal.heritageproperty.com",
 };
-
 
 const actionButtons = [
   { label: "Call Amber", href: "tel:7702008558", icon: Phone },
   { label: "Email Amber", href: "mailto:anash@heritageproperty.com", icon: Mail },
   { label: "Call Heritage Main", href: "tel:7704518171", icon: Phone },
-  { label: "Email Community Liaison", href: "mailto:hillsideatlenox@outlook.com", icon: Mail },
-  { label: "Open Vantaca", href: "https://portal.heritageproperty.com", icon: ExternalLink },
+  { label: "Email Community Liaison", href: "mailto:board@hillsideatlenox.com", icon: Mail },
+  { label: "Open Heritage Website", href: "https://www.heritageproperty.com", icon: ExternalLink },
   { label: "Call Community Watch", href: "tel:4048833350", icon: Phone },
   { label: "Call A-Tow", href: "tel:4045778950", icon: Phone },
 ];
@@ -66,7 +58,7 @@ const knowledgeBase = [
     category: "Dues Enforcement",
     keywords: ["dues", "late fee", "payment", "hoa", "assessment"],
     answer:
-      "Monthly dues are considered late after the 10th of each month. Residents should pay before that date to avoid late fees. For account-specific issues, payment history, or assistance, please use the Vantaca portal or contact property management directly.",
+      "Monthly dues are considered late after the 10th of each month. Residents should pay before that date to avoid late fees. For account-specific issues, payment history, or assistance, please contact Amber Nash or Heritage Property Management.",
   },
   {
     category: "Move In / Move Out Enforcement",
@@ -108,25 +100,25 @@ const knowledgeBase = [
     category: "Security & Emergency",
     keywords: ["security", "fob", "access", "door", "gate", "suspicious", "emergency", "911"],
     answer:
-      "Do not allow unknown individuals into the building or share access devices or codes. Report lost fobs immediately for deactivation. For suspicious activity, contact Community Watch at 404-883-3350 or 811 on a callbox. For an active emergency, fire, crime in progress, medical emergency, gas leak, or flooding, call 911 first.",
+      "Do not allow unknown individuals into the building or share access devices or codes. For suspicious activity, contact Community Watch at 404-883-3350 or 811 on a callbox. For an active emergency, fire, crime in progress, medical emergency, gas leak, or flooding, call 911 first.",
   },
   {
     category: "Maintenance & Repairs",
     keywords: ["maintenance", "repair", "work order", "leak", "broken", "vantaca"],
     answer:
-      "Routine maintenance requests should be submitted through the Vantaca portal at portal.heritageproperty.com. For emergencies such as fire, gas leaks, flooding, or medical emergencies, call 911 first and then notify property management or the emergency answering service.",
+      "For maintenance or repair concerns, contact Amber Nash, CAM at anash@heritageproperty.com or 770-200-8558. For emergencies such as fire, gas leaks, flooding, or medical emergencies, call 911 first and then notify Heritage using the 24-hour line at 770-451-8171.",
   },
   {
     category: "Sauna",
     keywords: ["sauna", "reserve sauna", "booking", "amenity", "reservation"],
     answer:
-      "The sauna must be reserved and used according to community guidelines. Follow all safety instructions, posted time limits, and amenity rules. For access or reservation issues, contact the Community Liaison.",
+      "The sauna must be reserved and used according to community guidelines. Follow all safety instructions, posted time limits, and amenity rules. For access or reservation issues, contact the Community Liaison at board@hillsideatlenox.com.",
   },
   {
     category: "Who To Contact",
-    keywords: ["contact", "call", "who do i contact", "phone", "manager", "liaison"],
+    keywords: ["contact", "call", "who do i contact", "phone", "manager", "liaison", "amber"],
     answer:
-      "Property Manager: Delethia Foxx at dfoxx@heritageproperty.com or 770-200-8610. Community Liaison: hillsideatlenox@outlook.com. Emergency Answering Service: 770-200-8237 daytime or 770-451-8171 after hours. Use Vantaca for routine requests.",
+      "Property Manager: Amber Nash, CAM, Community Association Manager, Heritage Property Management Services, LLC. Email: anash@heritageproperty.com. Direct: 770-200-8558. Main: 770-451-8171. Office: 500 Sugar Mill Road, Building B, Suite 200, Atlanta, GA 30350. Website: www.heritageproperty.com. Community Liaison: board@hillsideatlenox.com. Emergency Answering Service: 770-200-8237 daytime or 770-451-8171 24 hours.",
   },
 ];
 
@@ -144,30 +136,24 @@ function getBotResponse(message) {
   const matched = knowledgeBase.find((item) =>
     item.keywords.some((keyword) => normalized.includes(keyword))
   );
-
-  if (matched) {
-    return { title: matched.category, text: matched.answer };
-  }
-
+  if (matched) return { title: matched.category, text: matched.answer };
   if (normalized.includes("hello") || normalized.includes("hi") || normalized.includes("hey")) {
     return {
       title: "Welcome",
       text:
-        "Good day. I’m Lenox, the Hillside at Lenox resident assistant. I can help with parking rules, dues, amenities, maintenance requests, violations guidance, and who to contact for support.",
+        "Good day. I’m Lenox, the Hillside at Lenox resident assistant. I can help with parking rules, dues, amenities, maintenance requests, violation guidance, and who to contact for support.",
     };
   }
-
   return {
     title: "Need a human follow-up",
     text:
-      "I do not have a confident answer for that yet. For account-specific questions, formal violations, or emergencies, please contact property management or the Community Liaison. Unanswered questions can be reviewed and added to Lenox after approval.",
+      "I do not have a confident answer for that yet. For account-specific questions, formal violations, or emergencies, please contact Amber Nash or the Community Liaison at board@hillsideatlenox.com. Unanswered questions can be reviewed and added to Lenox after approval.",
   };
 }
 
 function Card({ children }) {
   return <div className="card">{children}</div>;
 }
-
 function Badge({ children }) {
   return <span className="badge">{children}</span>;
 }
@@ -202,6 +188,12 @@ export default function Home() {
       { role: "assistant", title: response.title, text: response.text },
     ]);
     setInput("");
+  };
+
+  const focusChat = () => {
+    const inputEl = document.querySelector("#lenox-chat-input");
+    inputEl?.focus();
+    inputEl?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
   return (
@@ -240,9 +232,9 @@ export default function Home() {
               <Badge>Handbook grounded</Badge>
             </div>
             <div className="featureGrid three">
-              <div className="feature"><AlertTriangle size={20} /><h3>Native page experience</h3><p>Residents can access Lenox from a menu item such as “Ask Lenox” or “Hillside Concierge.”</p></div>
-              <div className="feature"><FileWarning size={20} /><h3>Floating chat-ready</h3><p>The same chatbot can later be converted into a floating website chat button if HOA Express allows embeds.</p></div>
-              <div className="feature"><Phone size={20} /><h3>Compliance guardrails</h3><p>Lenox gives policy guidance while routing formal enforcement, emergencies, and account-specific issues to the proper channel.</p></div>
+              <div className="feature"><AlertTriangle size={20} /><h3>Native page experience</h3><p>Residents can access Lenox from a homepage button, menu item, or “Hillside Concierge” page.</p></div>
+              <div className="feature"><FileWarning size={20} /><h3>Action-ready support</h3><p>Residents can click to call Amber, email the Board, call Community Watch, or contact A-Tow.</p></div>
+              <div className="feature"><Phone size={20} /><h3>Compliance guardrails</h3><p>Lenox gives policy guidance while routing formal enforcement, emergencies, and account-specific issues properly.</p></div>
             </div>
             <div className="learning">
               <div className="learningTitle"><h3>Recent learning queue</h3><Badge>{learningEvents.length} items</Badge></div>
@@ -273,22 +265,14 @@ export default function Home() {
             <div className="contactGrid">
               {Object.values(handbookContacts).map((value) => <div className="contact" key={value}>{value}</div>)}
             </div>
-
             <div className="actionsBlock">
               <h4>Quick resident actions</h4>
               <div className="actionGrid">
                 {actionButtons.map((action) => {
                   const Icon = action.icon;
                   return (
-                    <a
-                      key={action.label}
-                      href={action.href}
-                      target={action.href.startsWith("http") ? "_blank" : undefined}
-                      rel={action.href.startsWith("http") ? "noreferrer" : undefined}
-                      className="actionButton"
-                    >
-                      <Icon size={16} />
-                      {action.label}
+                    <a key={action.label} href={action.href} target={action.href.startsWith("http") ? "_blank" : undefined} rel={action.href.startsWith("http") ? "noreferrer" : undefined} className="actionButton">
+                      <Icon size={16} />{action.label}
                     </a>
                   );
                 })}
@@ -322,18 +306,36 @@ export default function Home() {
           </div>
 
           <div className="composer">
-            <input value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") handleSend(); }} placeholder="Ask Lenox about parking, dues, amenities, or contacts..." />
+            <input id="lenox-chat-input" value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") handleSend(); }} placeholder="Ask Lenox about parking, dues, amenities, or contacts..." />
             <button onClick={() => handleSend()} aria-label="Send message"><Send size={18} /></button>
           </div>
+
           <div className="chatActions">
             <a href="tel:7702008558">Call Amber</a>
             <a href="mailto:anash@heritageproperty.com">Email Amber</a>
-            <a href="https://portal.heritageproperty.com" target="_blank" rel="noreferrer">Open Vantaca</a>
+            <a href="mailto:board@hillsideatlenox.com">Email Board</a>
           </div>
 
           <p className="disclaimer">Deployment-ready MVP: grounded in the Hillside handbook, designed for resident guidance, management routing, and human-approved updates.</p>
         </aside>
       </section>
+
+      <button className="lenoxFloat" onClick={focusChat} aria-label="Ask Lenox">
+        <span className="floatGlow" />
+        <span className="helpBubble">Need help?</span>
+        <span className="floatInner">
+          <span className="avatarDot">
+            <span className="onlinePing" />
+            <span className="onlineDot" />
+            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80" alt="Lenox" />
+          </span>
+          <span className="floatText">
+            <strong>Ask Lenox</strong>
+            <small>Hillside Concierge</small>
+          </span>
+          <MessageSquare size={20} />
+        </span>
+      </button>
     </main>
   );
 }
