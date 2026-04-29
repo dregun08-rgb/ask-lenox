@@ -55,3 +55,73 @@ h3 { margin-bottom: 10px; }
 .disclaimer { padding: 0 18px 18px; color: #64748b; font-size: 12px; line-height: 1.55; }
 @media (max-width: 1120px) { .layout, .featureGrid.three, .featureGrid.four { grid-template-columns: 1fr; } .chatCard { position: static; max-height: none; } }
 @media (max-width: 680px) { .page { padding: 12px; } .card { padding: 22px; } .stats, .contactGrid { grid-template-columns: 1fr; } .heroHeader, .sectionTop { align-items: flex-start; flex-direction: column; } }
+
+
+.actionsBlock {
+  margin-top: 24px;
+}
+
+.actionsBlock h4 {
+  margin: 0 0 12px;
+  color: #78716c;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 12px;
+}
+
+.actionGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #0f172a;
+  text-decoration: none;
+  border-radius: 18px;
+  padding: 13px 14px;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.05);
+}
+
+.actionButton:hover {
+  background: #f8fafc;
+}
+
+.chatActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 16px 12px;
+}
+
+.chatActions a {
+  text-decoration: none;
+  border-radius: 999px;
+  padding: 9px 12px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.chatActions a:first-child {
+  background: #0f172a;
+  color: #fff;
+}
+
+.chatActions a:not(:first-child) {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+@media (max-width: 680px) {
+  .actionGrid {
+    grid-template-columns: 1fr;
+  }
+}

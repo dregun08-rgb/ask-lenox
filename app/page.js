@@ -11,6 +11,8 @@ import {
   AlertTriangle,
   Phone,
   FileWarning,
+  Mail,
+  ExternalLink,
 } from "lucide-react";
 
 const learningEvents = [
@@ -35,6 +37,17 @@ const handbookContacts = {
   towing: "A-Tow: 404-577-8950",
   portal: "Vantaca portal: portal.heritageproperty.com",
 };
+
+
+const actionButtons = [
+  { label: "Call Amber", href: "tel:7702008558", icon: Phone },
+  { label: "Email Amber", href: "mailto:anash@heritageproperty.com", icon: Mail },
+  { label: "Call Heritage Main", href: "tel:7704518171", icon: Phone },
+  { label: "Email Community Liaison", href: "mailto:hillsideatlenox@outlook.com", icon: Mail },
+  { label: "Open Vantaca", href: "https://portal.heritageproperty.com", icon: ExternalLink },
+  { label: "Call Community Watch", href: "tel:4048833350", icon: Phone },
+  { label: "Call A-Tow", href: "tel:4045778950", icon: Phone },
+];
 
 const knowledgeBase = [
   {
@@ -260,6 +273,27 @@ export default function Home() {
             <div className="contactGrid">
               {Object.values(handbookContacts).map((value) => <div className="contact" key={value}>{value}</div>)}
             </div>
+
+            <div className="actionsBlock">
+              <h4>Quick resident actions</h4>
+              <div className="actionGrid">
+                {actionButtons.map((action) => {
+                  const Icon = action.icon;
+                  return (
+                    <a
+                      key={action.label}
+                      href={action.href}
+                      target={action.href.startsWith("http") ? "_blank" : undefined}
+                      rel={action.href.startsWith("http") ? "noreferrer" : undefined}
+                      className="actionButton"
+                    >
+                      <Icon size={16} />
+                      {action.label}
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
           </Card>
         </div>
 
@@ -291,6 +325,12 @@ export default function Home() {
             <input value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") handleSend(); }} placeholder="Ask Lenox about parking, dues, amenities, or contacts..." />
             <button onClick={() => handleSend()} aria-label="Send message"><Send size={18} /></button>
           </div>
+          <div className="chatActions">
+            <a href="tel:7702008558">Call Amber</a>
+            <a href="mailto:anash@heritageproperty.com">Email Amber</a>
+            <a href="https://portal.heritageproperty.com" target="_blank" rel="noreferrer">Open Vantaca</a>
+          </div>
+
           <p className="disclaimer">Deployment-ready MVP: grounded in the Hillside handbook, designed for resident guidance, management routing, and human-approved updates.</p>
         </aside>
       </section>
