@@ -5,10 +5,12 @@
     "start": "next start"
   },
   "dependencies": {
+    "@supabase/supabase-js": "latest",
+    "framer-motion": "latest",
+    "lucide-react": "latest",
     "next": "latest",
     "react": "latest",
-    "react-dom": "latest",
-    "lucide-react": "latest"
+    "react-dom": "latest"
   },
   "devDependencies": {}
 }
