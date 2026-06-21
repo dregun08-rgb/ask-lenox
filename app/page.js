@@ -93,6 +93,9 @@ export default function Home() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([{ role: "assistant", title: "Welcome", text: "Good day. I’m Lenox — the Hillside at Lenox resident assistant. Ask me about parking, dues, amenities, maintenance, violations, or who to contact." }]);
   const [adminMode, setAdminMode] = useState(false);
+  const [adminUnlocked, setAdminUnlocked] = useState(false);
+const [adminPassword, setAdminPassword] = useState("");
+const BOARD_PASSWORD = "Hillside2026!";
   const [learningQueue, setLearningQueue] = useState([]);
   const [approvedKnowledge, setApprovedKnowledge] = useState([]);
   const [selectedLearningId, setSelectedLearningId] = useState(null);
