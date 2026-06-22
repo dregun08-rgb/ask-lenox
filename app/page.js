@@ -203,7 +203,56 @@ const BOARD_PASSWORD = "Hillside2026!";
           ].map((item) => { const Icon = item.icon; return <div className="feature mini" key={item.title}><Icon size={20} /><h3>{item.title}</h3><p>{item.text}</p></div>; })}</div>
 
           <Card>
-            <div className="sectionTop"><div><p className="eyebrow">Admin Learning Dashboard</p><h2>Review and approve Lenox answers</h2></div><button className="outlineButton" onClick={() => setAdminMode((p) => !p)}>{adminMode ? "Hide Admin" : "Open Admin"}</button></div>
+  <div className="sectionTop">
+    <div>
+      <p className="eyebrow">Board Access</p>
+      <h2>Admin Learning Dashboard</h2>
+    </div>
+  </div>
+
+  {!adminUnlocked ? (
+    <div className="formStack">
+      <label>
+        Board password
+        <input
+          type="password"
+          value={adminPassword}
+          onChange={(e) => setAdminPassword(e.target.value)}
+          placeholder="Enter board password"
+        />
+      </label>
+
+      <button
+        className="primaryButton"
+        onClick={() => {
+          if (adminPassword === BOARD_PASSWORD) {
+            setAdminUnlocked(true);
+            setAdminMode(true);
+          } else {
+            alert("Incorrect password");
+          }
+        }}
+      >
+        Unlock Admin
+      </button>
+    </div>
+  ) : (
+    <>
+      <button
+        className="outlineButton"
+        onClick={() => setAdminMode((p) => !p)}
+      >
+        {adminMode ? "Hide Admin" : "Open Admin"}
+      </button>
+
+      {adminMode && (
+        <div className="adminGrid">
+          {/* keep your existing adminGrid code here */}
+        </div>
+      )}
+    </>
+  )}
+</Card><h2>Review and approve Lenox answers</h2></div><button className="outlineButton" onClick={() => setAdminMode((p) => !p)}>{adminMode ? "Hide Admin" : "Open Admin"}</button></div>
             {adminMode && <div className="adminGrid">
               <div className="adminPanel"><div className="sectionTop compact"><h3>Pending questions</h3><Badge>{learningQueue.length} pending</Badge></div><div className="queueList">{learningQueue.length === 0 && <p className="muted">No pending resident questions right now.</p>}{learningQueue.map((item) => <button key={item.id} className={`queueItem ${selectedLearning?.id === item.id ? "selected" : ""}`} onClick={() => setSelectedLearningId(item.id)}><strong>{item.question}</strong><span>{item.status}</span></button>)}</div></div>
               <div className="adminPanel">{selectedLearning ? <div className="formStack"><label>Resident question<div className="readonlyBox">{selectedLearning.question}</div></label><label>Approved answer category<input value={selectedLearning.suggestedCategory} onChange={(e) => updateLearningItem("suggestedCategory", e.target.value)} /></label><label>Keywords Lenox should recognize<input value={selectedLearning.suggestedKeywords} onChange={(e) => updateLearningItem("suggestedKeywords", e.target.value)} /></label><label>Approved answer<textarea value={selectedLearning.suggestedAnswer} onChange={(e) => updateLearningItem("suggestedAnswer", e.target.value)} /></label><div className="buttonRow"><button className="primaryButton" onClick={approveLearningItem}>Approve and add to Lenox</button><button className="outlineButton" onClick={rejectLearningItem}>Reject</button></div></div> : <p className="muted">Select a pending question to review.</p>}</div>
