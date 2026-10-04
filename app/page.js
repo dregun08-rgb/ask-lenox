@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { motion } from "framer-motion";
 import {
@@ -210,6 +210,7 @@ export default function Home() {
   const [speechEnabled, setSpeechEnabled] = useState(true);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [britishVoice, setBritishVoice] = useState(null);
+  const premiumAudioRef = useRef(null);
   const [adminOpen, setAdminOpen] = useState(false);
   const [adminUnlocked, setAdminUnlocked] = useState(false);
   const [adminPassword, setAdminPassword] = useState("");
@@ -254,10 +255,14 @@ export default function Home() {
     };
     chooseVoice();
     window.speechSynthesis.onvoiceschanged = chooseVoice;
-    return () => { window.speechSynthesis.cancel(); window.speechSynthesis.onvoiceschanged = null; };
+    return () => {
+      premiumAudioRef.current?.pause();
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.onvoiceschanged = null;
+    };
   }, []);
 
-  function speakAsLenox(title, text) {
+  function speakWithBrowserVoice(title, text) {
     if (!speechEnabled || typeof window === "undefined" || !window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     const cleanText = String(text || "").replace(/\s+/g, " ").slice(0, 900);
@@ -272,11 +277,37 @@ export default function Home() {
     window.speechSynthesis.speak(utterance);
   }
 
+  async function speakAsLenox(title, text) {
+    if (!speechEnabled || typeof window === "undefined") return;
+    const cleanText = String(text || "").replace(/\s+/g, " ").slice(0, 1200);
+    try {
+      premiumAudioRef.current?.pause();
+      window.speechSynthesis?.cancel();
+      const response = await fetch("/api/lenox-voice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: `Good day. ${title}. ${cleanText}` }),
+      });
+      if (!response.ok) throw new Error("Premium voice unavailable");
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      premiumAudioRef.current = audio;
+      audio.onplay = () => setIsSpeaking(true);
+      audio.onended = () => { setIsSpeaking(false); URL.revokeObjectURL(audioUrl); };
+      audio.onerror = () => { setIsSpeaking(false); URL.revokeObjectURL(audioUrl); speakWithBrowserVoice(title, text); };
+      await audio.play();
+    } catch {
+      speakWithBrowserVoice(title, text);
+    }
+  }
+
   function toggleSpeech() {
     const next = !speechEnabled;
     setSpeechEnabled(next);
-    if (!next && typeof window !== "undefined" && window.speechSynthesis) {
-      window.speechSynthesis.cancel();
+    if (!next && typeof window !== "undefined") {
+      premiumAudioRef.current?.pause();
+      window.speechSynthesis?.cancel();
       setIsSpeaking(false);
     }
   }
@@ -361,7 +392,7 @@ export default function Home() {
     <Card><div className="sectionTop"><div><p className="eyebrow">Board Access</p><h2>Admin Learning Dashboard</h2></div><button className="outlineButton" onClick={toggleAdmin}>{adminOpen ? "Close Admin" : "Open Admin"}</button></div>{adminOpen && (!adminUnlocked ? <form className="formStack" onSubmit={unlockAdmin}><label>Board password<input type="password" autoComplete="current-password" value={adminPassword} onChange={(event) => setAdminPassword(event.target.value)} placeholder="Enter board password" required /></label><button className="primaryButton">Unlock Admin</button>{adminError && <p className="errorText">{adminError}</p>}</form> : <div className="adminGrid"><div className="adminPanel"><div className="sectionTop compact"><h3>Pending questions</h3><Badge>{learningQueue.length} pending</Badge></div><div className="queueList">{learningQueue.length ? learningQueue.map((item) => <button key={item.id} className={`queueItem ${selectedLearning?.id === item.id ? "selected" : ""}`} onClick={() => setSelectedLearningId(item.id)}><strong>{item.question}</strong><span>{item.status}</span></button>) : <p className="muted">No pending resident questions right now.</p>}</div></div><div className="adminPanel">{selectedLearning ? <div className="formStack"><label>Resident question<div className="readonlyBox">{selectedLearning.question}</div></label><label>Approved answer category<input value={selectedLearning.suggestedCategory} onChange={(event) => updateSelected("suggestedCategory", event.target.value)} /></label><label>Keywords Lenox should recognize<input value={selectedLearning.suggestedKeywords} onChange={(event) => updateSelected("suggestedKeywords", event.target.value)} /></label><label>Approved answer<textarea value={selectedLearning.suggestedAnswer} onChange={(event) => updateSelected("suggestedAnswer", event.target.value)} /></label><div className="buttonRow"><button className="primaryButton" onClick={approveSelected}>Approve and add to Lenox</button><button className="outlineButton" onClick={rejectSelected}>Reject</button></div></div> : <p className="muted">Select a pending question to review.</p>}</div></div>)}{adminOpen && adminUnlocked && <form className="formStack teachForm" onSubmit={saveDocument}><div className="sectionTop compact"><h3>Teach Lenox From New Document</h3><button type="button" className="outlineButton" onClick={addResidentTutorial}>New Resident Tutorial</button></div><label>Document Title<input value={newDocument.title} onChange={(event) => setNewDocument({ ...newDocument, title: event.target.value })} required /></label><label>Category<input value={newDocument.category} onChange={(event) => setNewDocument({ ...newDocument, category: event.target.value })} required /></label><label>Keywords <span className="muted">(comma-separated)</span><input value={newDocument.keywords} onChange={(event) => setNewDocument({ ...newDocument, keywords: event.target.value })} required /></label><label>Document Content<textarea value={newDocument.content} onChange={(event) => setNewDocument({ ...newDocument, content: event.target.value })} required /></label><button className="primaryButton">Save to approved knowledge</button>{notice && <p className="muted">{notice}</p>}</form>}</Card>
     {adminOpen && adminUnlocked && <Card className="teachForm"><div className="sectionTop compact"><div><p className="eyebrow">One-time knowledge import</p><h3>Add Bylaws, CCR, and Handbook</h3></div><button type="button" className="primaryButton" disabled={importingHandbook} onClick={importHandbook}>{importingHandbook ? "Adding source docs…" : "Add source docs to Lenox"}</button></div><p className="muted">This saves the Bylaws, CCR, and handbook as searchable, Board-approved topics in Lenox’s knowledge base. It will not create duplicate topics.</p>{notice && <p className="muted">{notice}</p>}</Card>}
     <Card><h2>Key contacts Lenox can reference</h2><div className="contactGrid">{Object.values(contacts).map((value) => <div className="contact" key={value}>{value}</div>)}</div><div className="actionsBlock"><h3>Quick resident actions</h3><div className="actionGrid">{actionButtons.map(({ label, href, icon: Icon }) => <a key={label} href={href} target={href.startsWith("http") ? "_blank" : undefined} rel={href.startsWith("http") ? "noreferrer" : undefined} className="actionButton"><Icon size={16} />{label}</a>)}</div></div></Card>
-  </div><aside className="chatCard"><div className="chatHeader"><div className="avatarWrap"><div className={`rabbitAvatar ${isSpeaking ? "talking" : ""}`} aria-label="Lenox rabbit avatar"><span className="rabbitEar leftEar" /><span className="rabbitEar rightEar" /><span className="rabbitFace"><span className="rabbitEye leftEye" /><span className="rabbitEye rightEye" /><span className="rabbitNose" /><span className="rabbitMouth" /></span></div><div><h2>Ask Lenox</h2><p>{isSpeaking ? "Lenox is speaking" : "Hillside rabbit concierge"}</p></div></div><div className="voiceControls"><Badge>{britishVoice ? "British Voice" : "Voice Ready"}</Badge><button type="button" className={`voiceButton ${speechEnabled ? "active" : ""}`} onClick={toggleSpeech}>{speechEnabled ? "Voice On" : "Muted"}</button></div></div><div className="quickPrompts">{quickPrompts.map((prompt) => <button key={prompt} onClick={() => sendQuestion(prompt)}>{prompt}</button>)}</div><div className="messages">{messages.map((message, index) => <div key={index} className={`messageRow ${message.role === "user" ? "right" : "left"}`}><div className={`bubble ${message.role}`}>{message.title && message.role === "assistant" && <p className="bubbleTitle">{message.title}</p>}<p>{message.text}</p></div></div>)}</div><div className="composer"><input id="lenox-chat-input" value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") sendQuestion(); }} placeholder="Ask Lenox about parking, amenities, or contacts..." /><button onClick={() => sendQuestion()} aria-label="Send message"><Send size={18} /></button></div><div className="chatActions"><a href="tel:7702008610">Call Amber</a><a href="mailto:anash@heritageproperty.com">Email Amber</a><a href={`mailto:${BOARD_EMAIL}`}>Email Board</a></div></aside></section>
-    <motion.button className="lenoxFloat" onClick={focusChat} aria-label="Ask Lenox" initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} whileHover={{ scale: 1.04 }}><span className="floatGlow" /><span className="helpBubble">Need help?</span><span className="floatInner"><span className={`miniRabbit ${isSpeaking ? "talking" : ""}`} /><span className="floatText"><strong>Ask Lenox</strong><small>British Rabbit Concierge</small></span></span></motion.button>
+  </div><aside className="chatCard"><div className="chatHeader"><div className="avatarWrap"><div className={`rabbitAvatar ${isSpeaking ? "talking" : ""}`} aria-label="Lenox rabbit avatar"><span className="rabbitEar leftEar" /><span className="rabbitEar rightEar" /><span className="rabbitFace"><span className="rabbitEye leftEye" /><span className="rabbitEye rightEye" /><span className="rabbitNose" /><span className="rabbitMouth" /></span></div><div><h2>Ask Lenox</h2><p>{isSpeaking ? "Lenox is speaking" : "Your Hillside Concierge"}</p></div></div><div className="voiceControls"><Badge>{britishVoice ? "Premium Voice" : "Voice Ready"}</Badge><button type="button" className={`voiceButton ${speechEnabled ? "active" : ""}`} onClick={toggleSpeech}>{speechEnabled ? "Voice On" : "Muted"}</button></div></div><div className="quickPrompts">{quickPrompts.map((prompt) => <button key={prompt} onClick={() => sendQuestion(prompt)}>{prompt}</button>)}</div><div className="messages">{messages.map((message, index) => <div key={index} className={`messageRow ${message.role === "user" ? "right" : "left"}`}><div className={`bubble ${message.role}`}>{message.title && message.role === "assistant" && <p className="bubbleTitle">{message.title}</p>}<p>{message.text}</p></div></div>)}</div><div className="composer"><input id="lenox-chat-input" value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") sendQuestion(); }} placeholder="Ask Lenox about parking, amenities, or contacts..." /><button onClick={() => sendQuestion()} aria-label="Send message"><Send size={18} /></button></div><div className="chatActions"><a href="tel:7702008610">Call Amber</a><a href="mailto:anash@heritageproperty.com">Email Amber</a><a href={`mailto:${BOARD_EMAIL}`}>Email Board</a></div></aside></section>
+    <motion.button className="lenoxFloat" onClick={focusChat} aria-label="Ask Lenox" initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} whileHover={{ scale: 1.04 }}><span className="floatGlow" /><span className="helpBubble">Need help?</span><span className="floatInner"><span className={`miniRabbit ${isSpeaking ? "talking" : ""}`} /><span className="floatText"><strong>Ask Lenox</strong><small>Your Hillside Concierge</small></span></span></motion.button>
   </main>;
 }
