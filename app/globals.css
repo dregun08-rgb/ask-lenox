@@ -555,13 +555,24 @@ h2, h3 {
   right: 24px;
   bottom: 96px;
   width: min(320px, calc(100vw - 32px));
-  pointer-events: none;
+  pointer-events: auto;
   z-index: 49;
   filter: drop-shadow(0 24px 36px rgba(15, 23, 42, 0.22));
+  transform-origin: bottom right;
 }
 
-.lenoxPresence:not(.active) {
-  visibility: hidden;
+.lenoxPresence.idle {
+  filter: drop-shadow(0 14px 22px rgba(15, 23, 42, 0.16));
+}
+
+.lenoxPresence.idle .presenceSpeech {
+  opacity: 0;
+  transform: translateY(8px) scale(0.94);
+}
+
+.lenoxPresence.active .presenceSpeech {
+  opacity: 1;
+  transform: translateY(0) scale(1);
 }
 
 .presenceSpeech {
@@ -574,6 +585,7 @@ h2, h3 {
   padding: 13px 15px;
   color: #0f172a;
   box-shadow: var(--shadowSmall);
+  transition: opacity 0.22s ease, transform 0.22s ease;
 }
 
 .presenceSpeech::after {
@@ -614,6 +626,11 @@ h2, h3 {
   height: 214px;
   margin-left: auto;
   margin-right: 18px;
+  animation: stageRabbitIdle 2.5s ease-in-out infinite alternate;
+  cursor: pointer;
+}
+
+.lenoxPresence.active .largeRabbit {
   animation: stageRabbitBounce 0.85s ease-in-out infinite alternate;
 }
 
@@ -632,11 +649,19 @@ h2, h3 {
 
 .largeLeftEar {
   left: 42px;
+  transform: rotate(-16deg);
+}
+
+.lenoxPresence.active .largeLeftEar {
   animation: bigEarLeft 0.72s ease-in-out infinite alternate;
 }
 
 .largeRightEar {
   right: 42px;
+  transform: rotate(16deg);
+}
+
+.lenoxPresence.active .largeRightEar {
   animation: bigEarRight 0.72s ease-in-out infinite alternate;
 }
 
@@ -686,11 +711,15 @@ h2, h3 {
   left: 50%;
   top: 86px;
   width: 30px;
-  height: 18px;
+  height: 10px;
   border: 3px solid #0f172a;
   border-top: 0;
   border-radius: 0 0 999px 999px;
   transform: translateX(-50%);
+}
+
+.lenoxPresence.active .largeMouth {
+  height: 18px;
   animation: bigRabbitTalk 0.2s infinite alternate;
 }
 
@@ -872,6 +901,15 @@ h2, h3 {
   }
   to {
     transform: translateY(-8px) rotate(1deg);
+  }
+}
+
+@keyframes stageRabbitIdle {
+  from {
+    transform: translateY(0) rotate(-0.5deg);
+  }
+  to {
+    transform: translateY(-4px) rotate(0.5deg);
   }
 }
 
